@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->date('due_date');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

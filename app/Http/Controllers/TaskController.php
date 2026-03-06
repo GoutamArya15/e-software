@@ -28,22 +28,28 @@ class TaskController extends Controller
 
     public function index()
     {
-        $tasks = auth()->user()->tasks()->get();
-       return response()->json([
-        'status' => true,
-        'message' => 'Tasks fetched successfully',
-        'data' => $tasks
-    ]);
+        $tasks = auth()->user()->tasks()->latest()->paginate(10);
+        return response()->json([
+            'status' => true,
+            'message' => 'Tasks fetched successfully',
+            'data' => $tasks
+        ]);
     }
 
     public function show($id)
     {
+        if (!auth()->user()->tasks()->where('id', $id)->exists()) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
         $task = Task::findOrFail($id);
         return response()->json($task);
     }
 
     public function update(Request $request, $id)
     {
+        if (!auth()->user()->tasks()->where('id', $id)->exists()) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
         $task = Task::findOrFail($id);
         $task->update($request->all());
 
@@ -51,13 +57,19 @@ class TaskController extends Controller
     }
     public function destroy($id)
     {
+        if (!auth()->user()->tasks()->where('id', $id)->exists()) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
         Task::destroy($id);
         return response()->json(['message' => 'Deleted']);
     }
     public function complete($id)
     {
+        if (!auth()->user()->tasks()->where('id', $id)->exists()) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
         $task = Task::findOrFail($id);
-        $task->status = true;
+        $task->status = 'completed';
         $task->save();
 
         return response()->json($task);
